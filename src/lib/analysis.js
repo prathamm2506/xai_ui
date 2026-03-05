@@ -1,6 +1,6 @@
 // API Configuration
 // Use environment variable if available, otherwise fallback to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://xai-api-production-e123.up.railway.app";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 /**
  * Generate a layman's report using Gemini API

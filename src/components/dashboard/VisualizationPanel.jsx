@@ -10,8 +10,7 @@ export function VisualizationPanel({ originalImage, results, isLoading }) {
   const [imageUrls, setImageUrls] = useState({
     original: null,
     heatmap: null,
-    gradcam: null,
-    overlay: null
+    gradcam: null
   });
 
   useEffect(() => {
@@ -19,15 +18,13 @@ export function VisualizationPanel({ originalImage, results, isLoading }) {
       setImageUrls({
         original: results.images.original || originalImage,
         heatmap: results.images.heatmap || originalImage,
-        gradcam: results.images.gradcam || originalImage,
-        overlay: results.images.overlay || originalImage
+        gradcam: results.images.gradcam || originalImage
       });
     } else {
       setImageUrls({
         original: originalImage,
         heatmap: originalImage,
-        gradcam: originalImage,
-        overlay: originalImage
+        gradcam: originalImage
       });
     }
   }, [results, originalImage]);
@@ -58,7 +55,7 @@ export function VisualizationPanel({ originalImage, results, isLoading }) {
           </div>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gray-100 mb-4">
+            <TabsList className="grid w-full grid-cols-3 bg-gray-100 mb-4">
               <TabsTrigger 
                 value="original" 
                 className="flex items-center gap-2 text-xs text-gray-600 data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700"
@@ -79,13 +76,6 @@ export function VisualizationPanel({ originalImage, results, isLoading }) {
               >
                 <Layers className="w-3 h-3" />
                 <span className="hidden sm:inline">GradCAM</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="overlay" 
-                className="flex items-center gap-2 text-xs text-gray-600 data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700"
-              >
-                <Layers className="w-3 h-3" />
-                <span className="hidden sm:inline">Overlay</span>
               </TabsTrigger>
             </TabsList>
 
@@ -110,50 +100,6 @@ export function VisualizationPanel({ originalImage, results, isLoading }) {
                   <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/80 rounded px-2 py-1">
                     <div className="w-24 h-2 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-red-500" />
                     <span className="text-[10px] text-gray-500 ml-1">Intensity</span>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="overlay" className="m-0 absolute inset-0">
-                <div className="relative w-full h-full">
-                  {results?.simulated ? (
-                    // Simulated Overlay with attention regions
-                    <>
-                      <img
-                        src={getImageUrl('overlay')}
-                        alt="CT Scan with Overlay"
-                        className="w-full h-full object-contain"
-                        crossOrigin="anonymous"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-transparent mix-blend-overlay" />
-                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                        {results.regions && results.regions.map((region, i) => (
-                          <circle
-                            key={i}
-                            cx={region.x}
-                            cy={region.y}
-                            r={region.radius * 2}
-                            fill="none"
-                            stroke="rgba(147, 51, 234, 0.6)"
-                            strokeWidth="2"
-                            className="animate-pulse"
-                            style={{ animationDelay: `${i * 0.2}s` }}
-                          />
-                        ))}
-                      </svg>
-                    </>
-                  ) : (
-                    // Real overlay from API
-                    <img
-                      src={getImageUrl('overlay')}
-                      alt="Overlay Visualization"
-                      className="w-full h-full object-contain"
-                      crossOrigin="anonymous"
-                    />
-                  )}
-                  <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/80 rounded px-2 py-1">
-                    <div className="w-24 h-2 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500" />
-                    <span className="text-[10px] text-gray-500 ml-1">Attention</span>
                   </div>
                 </div>
               </TabsContent>
@@ -222,13 +168,6 @@ export function VisualizationPanel({ originalImage, results, isLoading }) {
                   {results?.simulated 
                     ? "Gradient-weighted Class Activation Mapping (GradCAM)" 
                     : "GradCAM visualization showing model attention areas"}
-                </span>
-              )}
-              {activeTab === "overlay" && (
-                <span>
-                  {results?.simulated 
-                    ? "Attention overlay highlighting regions of interest" 
-                    : "Overlay visualization combining GradCAM with original image"}
                 </span>
               )}
             </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Download, Calendar, User, Stethoscope, AlertCircle, CheckCircle, Brain, Loader2 } from "lucide-react";
+import { FileText, Download, Calendar, User, Stethoscope, AlertCircle, CheckCircle } from "lucide-react";
 import { generateGeminiReport } from "@/lib/analysis";
 
 export function ReportSection({ results, onDownloadPDF, geminiReport, setGeminiReport }) {
@@ -220,68 +220,6 @@ export function ReportSection({ results, onDownloadPDF, geminiReport, setGeminiR
               </li>
             ))}
           </ul>
-        </div>
-
-        {/* AI Explanation Section */}
-        <Separator className="bg-gray-200" />
-        
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Brain className="w-4 h-4 text-violet-600" />
-              Easy-to-Understand Explanation
-            </h4>
-            {/* Show regenerate button only when report is already displayed */}
-            {displayReport && !isGeneratingReport && (
-              <Button
-                onClick={handleGenerateAIReport}
-                size="sm"
-                variant="outline"
-                className="border-violet-300 text-violet-700 hover:bg-violet-50"
-              >
-                <Brain className="w-4 h-4 mr-2" />
-                Regenerate
-              </Button>
-            )}
-          </div>
-          
-          {isGeneratingReport && (
-            <div className="flex items-center justify-center p-6 bg-violet-50 rounded-lg border border-violet-200">
-              <Loader2 className="w-5 h-5 text-violet-600 animate-spin mr-2" />
-              <span className="text-sm text-violet-700">Generating easy-to-understand explanation...</span>
-            </div>
-          )}
-          
-          {reportError && (
-            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-sm text-red-600">{reportError}</p>
-              <Button
-                onClick={handleGenerateAIReport}
-                size="sm"
-                variant="ghost"
-                className="mt-2 text-red-700 hover:bg-red-100"
-              >
-                Try Again
-              </Button>
-            </div>
-          )}
-          
-          {displayReport && (
-            <div className="p-4 bg-violet-50 rounded-lg border border-violet-200">
-              <div className="text-sm text-gray-700 space-y-1">
-                {renderReportText(displayReport)}
-              </div>
-            </div>
-          )}
-          
-          {/* Show placeholder only when there's no report and not loading */}
-          {!displayReport && !isGeneratingReport && (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-500">
-                Generating easy-to-understand explanation from AI analysis...
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Disclaimer */}

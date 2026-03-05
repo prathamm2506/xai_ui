@@ -131,6 +131,38 @@ export async function generatePDF(results, imageUrl, geminiReport = null) {
   yPos += 10;
 
   // ============================================
+  // Gemini AI Report (if available)
+  // ============================================
+  
+  if (geminiReport && geminiReport.trim().length > 0) {
+    // Check if we need a new page (keep it under 2 pages)
+    if (yPos > 200) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    doc.text("AI-Powered Explanation:", margin, yPos);
+    
+    yPos += 8;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(40, 40, 40);
+    
+    // Process the gemini report - remove markdown headers for PDF
+    let cleanReport = geminiReport
+      .replace(/## /g, '')
+      .replace(/### /g, '')
+      .replace(/\*\*/g, '');
+    
+    yPos = addWrappedText(cleanReport, margin, yPos, contentWidth);
+    
+    yPos += 10;
+  }
+
+  // ============================================
   // Disclaimer
   // ============================================
   

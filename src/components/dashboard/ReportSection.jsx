@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Download, Calendar, User, Stethoscope, AlertCircle, CheckCircle } from "lucide-react";
+import { FileText, Download, Calendar, User, Stethoscope, AlertCircle, CheckCircle, Sparkles, RefreshCw } from "lucide-react";
 import { generateGeminiReport } from "@/lib/analysis";
 
 export function ReportSection({ results, onDownloadPDF, geminiReport, setGeminiReport }) {
@@ -221,6 +221,43 @@ export function ReportSection({ results, onDownloadPDF, geminiReport, setGeminiR
             ))}
           </ul>
         </div>
+
+        {/* AI Explanation Button - Show only if no report available */}
+        <div className="flex justify-center">
+          {!displayReport && !isGeneratingReport && (
+            <Button
+              onClick={handleGenerateAIReport}
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Generate AI Explanation
+            </Button>
+          )}
+          {isGeneratingReport && (
+            <div className="flex items-center gap-2 text-gray-500">
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              <span>Generating AI explanation...</span>
+            </div>
+          )}
+          {reportError && (
+            <p className="text-sm text-red-500">{reportError}</p>
+          )}
+        </div>
+
+        {/* Gemini AI Report - Horizontal Box */}
+        {displayReport && (
+          <div className="mt-6">
+            <div className="bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-violet-600" />
+                <h4 className="text-sm font-semibold text-violet-800">AI-Powered Explanation</h4>
+              </div>
+              <div className="text-sm text-gray-700 space-y-2 max-h-96 overflow-y-auto">
+                {renderReportText(displayReport)}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Disclaimer */}
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">

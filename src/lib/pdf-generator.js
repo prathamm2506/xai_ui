@@ -4,7 +4,6 @@ export async function generatePDF(results, imageUrl, geminiReport = null) {
   
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
   const contentWidth = pageWidth - margin * 2;
   let yPos = 20;
@@ -18,213 +17,142 @@ export async function generatePDF(results, imageUrl, geminiReport = null) {
     return y + textHeight;
   };
 
-  // Helper function to check if we need a new page and add one if needed
-  const checkAndAddPage = (requiredSpace, addHeader = true) => {
-    if (yPos + requiredSpace > pageHeight - margin) {
-      doc.addPage();
-      yPos = margin;
-      return true;
-    }
-    return false;
-  };
-
   // Helper function to add space
   const addSpace = (space) => {
     yPos += space;
   };
 
-  // Helper function to draw a horizontal line
-  const addDivider = (y) => {
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, y, pageWidth - margin, y);
-    return y + 10;
-  };
-
   // ============================================
-  // PAGE 1: Report Header and Main Findings
+  // Report Header
   // ============================================
   
-  // Header
-  doc.setFillColor(20, 30, 50);
-  doc.rect(0, 0, pageWidth, 40, "F");
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
+  doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
-  doc.text("LungVision AI", margin, 20);
-  
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Lung Cancer Image Analysis Report", margin, 30);
+  doc.setTextColor(0, 0, 0);
+  doc.text("LungVision AI - Analysis Report", margin, yPos);
+
+  yPos += 10;
 
   // Report metadata
-  yPos = 50;
-  doc.setTextColor(100, 100, 100);
-  doc.setFontSize(9);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(80, 80, 80);
   doc.text(`Report ID: ${results.reportId}`, margin, yPos);
   doc.text(`Date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, pageWidth - margin - 60, yPos);
 
-  // Divider
-  yPos = addDivider(yPos + 5);
+  yPos += 15;
 
-  // Primary Finding Section
-  doc.setTextColor(30, 30, 30);
+  // Divider line
+  doc.setDrawColor(0, 0, 0);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
+
+  yPos += 15;
+
+  // ============================================
+  // Primary Finding
+  // ============================================
+  
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("Primary Finding", margin, yPos);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Primary Finding:", margin, yPos);
   
-  yPos += 10;
+  yPos += 8;
   
-  // Check for page overflow
-  checkAndAddPage(30);
-  
-  doc.setFontSize(18);
-  const isNormal = results.classification === "Normal";
-  doc.setTextColor(isNormal ? 34 : 234, isNormal ? 197 : 179, isNormal ? 94 : 8);
+  doc.setFontSize(16);
   doc.text(results.classification, margin, yPos);
 
   doc.setFontSize(12);
-  doc.setTextColor(100, 100, 100);
-  doc.text(`Confidence: ${results.confidence.toFixed(1)}%`, margin + 80, yPos);
+  doc.setTextColor(60, 60, 60);
+  doc.text(`Confidence: ${results.confidence.toFixed(1)}%`, margin + 70, yPos);
 
-  addSpace(20);
+  yPos += 15;
 
-  // Classification Distribution - Simplified (text only, no progress bars)
-  doc.setTextColor(30, 30, 30);
-  doc.setFontSize(14);
+  // ============================================
+  // Classification Distribution
+  // ============================================
+  
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Classification Distribution", margin, yPos);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Classification Distribution:", margin, yPos);
 
-  yPos += 10;
+  yPos += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  
-  // Calculate height needed for class distribution
-  const classDistHeight = results.classes.length * 12 + 10;
-  checkAndAddPage(classDistHeight);
   
   results.classes.forEach((cls) => {
-    doc.setTextColor(60, 60, 60);
+    doc.setTextColor(40, 40, 40);
     doc.text(`${cls.name}: ${cls.probability.toFixed(1)}%`, margin, yPos);
-    yPos += 12;
+    yPos += 6;
   });
 
-  addSpace(15);
-
-  // Summary (Key Findings Only)
-  doc.setTextColor(30, 30, 30);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("Summary", margin, yPos);
-
   yPos += 10;
+
+  // ============================================
+  // Summary
+  // ============================================
+  
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text("Summary:", margin, yPos);
+
+  yPos += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  
-  // Estimate height for wrapped text - only summary
-  const summaryLines = doc.splitTextToSize(results.analysis.summary, contentWidth);
-  const summaryHeight = summaryLines.length * 7 + 20;
-  checkAndAddPage(summaryHeight);
+  doc.setTextColor(40, 40, 40);
   
   yPos = addWrappedText(results.analysis.summary, margin, yPos, contentWidth);
 
-  addSpace(15);
-
-  // Recommendations
-  doc.setTextColor(30, 30, 30);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("Recommendations", margin, yPos);
-
   yPos += 10;
+
+  // ============================================
+  // Recommendations
+  // ============================================
+  
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text("Recommendations:", margin, yPos);
+
+  yPos += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  
-  // Calculate recommendations height
-  const recHeight = results.recommendations.length * 25 + 10;
-  checkAndAddPage(recHeight);
+  doc.setTextColor(40, 40, 40);
   
   results.recommendations.forEach((rec) => {
-    const bullet = "\u2022 ";
-    doc.text(bullet, margin, yPos);
-    yPos = addWrappedText(rec, margin + 5, yPos, contentWidth - 5);
-    yPos += 5;
+    const bullet = "- ";
+    const wrappedLines = doc.splitTextToSize(bullet + rec, contentWidth - 5);
+    doc.text(wrappedLines, margin, yPos);
+    yPos += wrappedLines.length * 5 + 2;
   });
 
-  // Easy-to-Understand Explanation (Gemini Report)
-  if (geminiReport) {
-    addSpace(15);
-    
-    // Estimate height for the gemini report
-    const cleanedReport = geminiReport
-      .replace(/## /g, '\n')
-      .replace(/### /g, '\n')
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/- /g, '\u2022 ');
-    
-    const reportLines = doc.splitTextToSize(cleanedReport, contentWidth);
-    const reportHeight = reportLines.length * 7 + 40;
-    
-    checkAndAddPage(reportHeight);
-    
-    // Draw background for section
-    doc.setFillColor(240, 240, 250);
-    doc.rect(margin, yPos - 5, contentWidth, 15, "F");
-    
-    doc.setTextColor(30, 30, 30);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Easy-to-Understand Explanation (AI Generated)", margin, yPos + 2);
-    
-    yPos += 20;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(60, 60, 60);
-    
-    yPos = addWrappedText(cleanedReport, margin, yPos, contentWidth);
-  }
+  yPos += 10;
 
-  addSpace(15);
-
-  // Disclaimer - check if we need a new page
-  checkAndAddPage(40);
+  // ============================================
+  // Disclaimer
+  // ============================================
   
-  doc.setFillColor(255, 240, 240);
-  doc.rect(margin, yPos - 5, contentWidth, 30, "F");
-  
-  doc.setFontSize(8);
-  doc.setTextColor(150, 50, 50);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text("DISCLAIMER", margin + 5, yPos + 2);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Disclaimer:", margin, yPos);
   
+  yPos += 6;
+  doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(100, 50, 50);
-  const disclaimer = "This AI-generated analysis is intended for educational and research purposes only. It should not be used as a substitute for professional medical diagnosis. Always consult with qualified healthcare professionals for medical decisions.";
-  yPos = addWrappedText(disclaimer, margin + 5, yPos + 8, contentWidth - 10, 5);
+  doc.setTextColor(60, 60, 60);
+  const disclaimer = "This analysis is for educational and research purposes only. It should not be used as a substitute for professional medical diagnosis. Always consult with qualified healthcare professionals for medical decisions.";
+  yPos = addWrappedText(disclaimer, margin, yPos, contentWidth, 5);
 
   // ============================================
-  // Footer on last page
+  // Footer
   // ============================================
   
-  const footerY = pageHeight - 15;
-  doc.setDrawColor(200, 200, 200);
-  doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
-  
   doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.setFont("helvetica", "normal");
-  doc.text("Generated by LungVision AI - Advanced Medical Imaging Analysis", margin, footerY);
-  
-  // Page numbers
-  const totalPages = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin - 25, footerY);
-  }
+  doc.setTextColor(100, 100, 100);
+  doc.text("Generated by LungVision AI", margin, 280);
 
   // Save the PDF
   doc.save(`LungVision_Report_${results.reportId}.pdf`);

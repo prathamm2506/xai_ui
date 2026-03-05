@@ -51,7 +51,9 @@ export function LungAnalysisDashboard() {
 
   const handleDownloadPDF = useCallback(async () => {
     if (results && uploadedImage) {
-      await generatePDF(results, uploadedImage, geminiReport);
+      // Use results.geminiReport if available, otherwise use locally generated geminiReport
+      const report = results.geminiReport || geminiReport;
+      await generatePDF(results, uploadedImage, report);
     }
   }, [results, uploadedImage, geminiReport]);
 
